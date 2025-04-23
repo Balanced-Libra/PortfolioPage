@@ -162,7 +162,10 @@
             position: relative;
             display: inline-block;
         }
-
+        .contact-section .flex-col {
+            margin-left: auto;
+            margin-right: auto;
+        }
         .tooltip .tooltiptext {
             visibility: hidden;
             width: 200px;
@@ -171,11 +174,10 @@
             text-align: center;
             border-radius: 6px;
             padding: 10px;
-            position: absolute;
+            position: fixed; /* Pins to the viewport */
             z-index: 1;
-            bottom: 125%;
-            left: 50%;
-            margin-left: -100px;
+            top: 60px; /* Below the HUD */
+            right: 20px; /* 20px from the right edge */
             opacity: 0;
             transition: opacity 0.3s;
             border: 2px solid var(--secondary);
@@ -354,6 +356,9 @@
                 <button id="view-skills" class="game-font px-6 py-3 bg-transparent border-2 border-green-500 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition">
                     VIEW SKILLS
                 </button>
+                <button id="view-services" class="game-font px-6 py-3 bg-transparent border-2 border-yellow-500 text-yellow-500 rounded-lg hover:bg-yellow-500 hover:text-white transition">
+                    VIEW SERVICES
+                </button>
             </div>
             
             <div class="mt-12 game-font text-xs text-gray-400 animate-pulse">
@@ -410,6 +415,7 @@
                                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">3D Printing</span>
                                 </div>
                             </div>
+                            <a href="https://github.com/Balanced-Libra/Hercules" target="_blank" class="game-font mt-4 block w-full px-4 py-2 bg-purple-600 text-white text-center rounded hover:bg-purple-700 transition">VIEW REPO</a>
                         </div>
                     </div>
                 </div>
@@ -443,6 +449,7 @@
                                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">Twitter API</span>
                                 </div>
                             </div>
+                            <a href="https://github.com/Balanced-Libra/XBOT" target="_blank" class="game-font mt-4 block w-full px-4 py-2 bg-purple-600 text-white text-center rounded hover:bg-purple-700 transition">VIEW REPO</a>
                         </div>
                     </div>
                 </div>
@@ -708,7 +715,7 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$75/hour</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                        <button onclick="selectService('IT Support', 'Can I hire you for IT support?')" class="w-full game-font mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                             SELECT
                         </button>
                     </div>
@@ -726,7 +733,7 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$150/project</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+                        <button onclick="selectService('3D Design', 'Can I hire you for a 3D design project?')" class="w-full game-font mt-4 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">
                             SELECT
                         </button>
                     </div>
@@ -744,7 +751,7 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$350/video</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                        <button onclick="selectService('AI Video Generation', 'Can I hire you to create an AI-generated video?')" class="w-full game-font mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
                             SELECT
                         </button>
                     </div>
@@ -762,7 +769,7 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$2000/project</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                        <button onclick="selectService('Custom Robotics', 'Can I hire you for a custom robotics project?')" class="w-full game-font mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
                             SELECT
                         </button>
                     </div>
@@ -780,7 +787,7 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$3000/app</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                        <button onclick="selectService('App Development', 'I would like you to create an app for me.')" class="w-full game-font mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
                             SELECT
                         </button>
                     </div>
@@ -798,13 +805,13 @@
                             <span class="text-gray-400">Starting at:</span>
                             <span class="text-white font-bold">$1500/project</span>
                         </div>
-                        <button class="w-full game-font mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
+                        <button onclick="selectService('IoT Solutions', 'Can I hire you for an IoT solutions project?')" class="w-full game-font mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
                             SELECT
                         </button>
                     </div>
                 </div>
             </div>
-            
+                            
             <div class="mt-16">
                 <h3 class="game-font text-2xl text-center text-purple-400 mb-8">QUEST BOARD</h3>
                 
@@ -903,21 +910,18 @@
             </div>
             
             <div class="bg-gray-800 rounded-lg overflow-hidden">
-                <div class="grid grid-cols-1 md:grid-cols-2">
-                    <div class="p-8">
+                <div class="flex flex-col items-center">
+                    <div class="p-8 w-full max-w-lg">
                         <h3 class="game-font text-xl text-green-400 mb-6">SEND MESSAGE</h3>
-                        
                         <form class="space-y-4">
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="name">Your Name</label>
                                 <input class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" type="text" id="name" placeholder="Enter your name">
                             </div>
-                            
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="email">Your Email</label>
                                 <input class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" type="email" id="email" placeholder="Enter your email">
                             </div>
-                            
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="subject">Subject</label>
                                 <select class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="subject">
@@ -927,83 +931,31 @@
                                     <option>General Question</option>
                                 </select>
                             </div>
-                            
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="message">Message</label>
                                 <textarea class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 h-32" id="message" placeholder="Enter your message"></textarea>
                             </div>
-                            
                             <button id="send-message" type="button" class="game-font w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                 SEND MESSAGE
                             </button>
                         </form>
                     </div>
-                    
-                    <div class="bg-gray-900 p-8 flex flex-col justify-between">
-                        <div>
-                            <h3 class="game-font text-xl text-purple-400 mb-6">CONTACT INFO</h3>
-                            
-                            <div class="space-y-4">
-                                <div class="flex items-start">
-                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
-                                        <i class="fas fa-envelope text-purple-300"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-gray-400 text-sm">Email</div>
-                                        <div class="text-white"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c6b7975666d61697f66796065797f4c6b616d6560226f6361">[email&#160;protected]</a></div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start">
-                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
-                                        <i class="fas fa-phone text-purple-300"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-gray-400 text-sm">Phone</div>
-                                        <div class="text-white">+1 (555) 123-4567</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start">
-                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
-                                        <i class="fas fa-map-marker-alt text-purple-300"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-gray-400 text-sm">Location</div>
-                                        <div class="text-white">Berlin, Germany</div>
-                                    </div>
-                                </div>
-                                
-                                <div class="flex items-start">
-                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
-                                        <i class="fas fa-clock text-purple-300"></i>
-                                    </div>
-                                    <div>
-                                        <div class="text-gray-400 text-sm">Working Hours</div>
-                                        <div class="text-white">Mon - Fri: 9am - 6pm PST</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8">
-                            <div class="text-gray-400 text-sm mb-3">Connect with me</div>
-                            <div class="flex space-x-4">
-                                <a href="#" class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-blue-800 transition">
-                                    <i class="fab fa-linkedin-in text-blue-300"></i>
-                                </a>
-                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
-                                    <i class="fab fa-github text-white"></i>
-                                </a>
-                                <a href="#" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition">
-                                    <i class="fab fa-instagram text-white"></i>
-                                </a>
-                            </div>
+                    <div class="mt-8">
+                        <div class="text-gray-400 text-sm mb-3 text-center">Connect with me</div>
+                        <div class="flex space-x-4 justify-center">
+                            <a href="https://www.linkedin.com/in/julius-guy-james" target="_blank" class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-blue-800 transition">
+                                <i class="fab fa-linkedin-in text-blue-300"></i>
+                            </a>
+                            <a href="https://github.com/Balanced-Libra" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                                <i class="fab fa-github text-white"></i>
+                            </a>
+                            <a href="#" target="_blank" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition">
+                                <i class="fab fa-instagram text-white"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
-            
+                                
             <div class="mt-16 text-center">
                 <div id="achievement-completionist" class="achievement">
                     <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
@@ -1525,6 +1477,11 @@
                 addExp(5);
             });
             
+            document.getElementById('view-services').addEventListener('click', function() {
+                document.getElementById('services').scrollIntoView({behavior: 'smooth'});
+                addExp(5);
+            });
+
             document.getElementById('send-message').addEventListener('click', function() {
                 const nameField = document.getElementById('name');
                 const emailField = document.getElementById('email');
@@ -1547,6 +1504,41 @@
             
             // Initialize HUD
             updateHUD();
+            // Service selection function
+            window.selectService = function(serviceName, message) {
+                // Scroll to Contact section
+                document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                
+                // Set form fields
+                const subjectField = document.getElementById('subject');
+                const messageField = document.getElementById('message');
+                
+                if (subjectField) {
+                    subjectField.value = 'Service Request';
+                }
+                if (messageField) {
+                    messageField.value = message;
+                }
+                
+                // Trigger existing service button logic
+                const service = document.querySelector(`button[onclick*="${serviceName}"]`).closest('.bg-gray-800.rounded-lg.p-6');
+                if (!service.classList.contains('viewed')) {
+                    service.classList.add('viewed');
+                    servicesViewed++;
+                    addExp(20);
+                    updateQuestProgress('quest-3', servicesViewed, 6);
+                }
+                
+                // Simulate selection effect
+                const button = document.querySelector(`button[onclick*="${serviceName}"]`);
+                button.textContent = 'SELECTED';
+                button.classList.add('glow');
+                
+                setTimeout(() => {
+                    button.textContent = 'SELECT';
+                    button.classList.remove('glow');
+                }, 2000);
+            };
         });
     </script>
 <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930842279f776a77',t:'MTc0NDY4NjcxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>

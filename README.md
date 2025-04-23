@@ -25,3 +25,17 @@ This portfolio is designed as a **gamified single-page website** using only HTML
 - **Font Awesome** for icons
 - **GitHub Pages** for hosting
 - **Custom Domain (guyjames.site)** via Namecheap
+
+## 🛡 License
+
+All rights reserved.  
+You may **not** reuse or redistribute the contents of this site (design, structure, or code) without explicit permission from the author.
+
+## 🙋 Author
+
+**Julius Guy-James**  
+[GitHub: Balanced-Libra](https://github.com/Balanced-Libra)
+
+---
+
+💬 For inquiries or collaborations, please visit the **Contact** section on the website.

@@ -1,0 +1,805 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julius Guy-James | Developer Portfolio</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Dynamic Background Canvas -->
+    <canvas id="background-canvas"></canvas>
+
+    <!-- Game HUD -->
+    <div id="game-hud" class="fixed top-0 left-0 w-full bg-gray-900 bg-opacity-80 z-50 px-4 py-2 flex justify-between items-center">
+        <div class="flex items-center">
+            <div class="game-font text-xs text-purple-400 mr-4">LVL <span id="level-display">1</span></div>
+            <div class="w-32">
+                <div class="exp-bar">
+                    <div id="exp-fill" class="exp-fill" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div class="tooltip">
+                <div class="game-font text-xs text-yellow-400"><i class="fas fa-star mr-1"></i><span id="achievements-count">0</span>/5</div>
+                <span class="tooltiptext">Unlock achievements by exploring the site!</span>
+            </div>
+            <div class="tooltip">
+                <div class="game-font text-xs text-green-400"><i class="fas fa-scroll mr-1"></i><span id="quests-count">0</span>/4</div>
+                <span class="tooltiptext">Complete quests to gain experience!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Achievement notification banner -->
+    <div id="achievement-banner" class="banner game-font text-sm">
+        <i class="fas fa-trophy mr-2"></i> Achievement Unlocked!
+        <div id="achievement-name" class="mt-1"></div>
+    </div>
+
+    <!-- Hero Section -->
+    <section id="hero" class="min-h-screen flex flex-col justify-center items-center relative overflow-hidden py-20">
+        <div class="parallax-layer absolute w-full h-full" data-speed="0.05">
+            <div class="absolute top-10 left-10 text-purple-300 opacity-20 text-9xl">
+                <i class="fas fa-code"></i>
+            </div>
+            <div class="absolute bottom-20 right-10 text-green-300 opacity-20 text-9xl">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="absolute top-40 right-40 text-yellow-300 opacity-20 text-9xl">
+                <i class="fas fa-microchip"></i>
+            </div>
+        </div>
+        
+        <div class="text-center z-10 max-w-4xl px-4">
+            <div class="mb-6 floating">
+                <div class="game-font text-sm text-purple-400 mb-2">// press start to begin</div>
+                <h1 class="text-5xl md:text-7xl font-bold mb-2">Julius Guy-James</h1>
+                <div class="game-font text-green-400 text-xl">Creative Tech Generalist</div>
+            </div>
+            
+            <p class="text-xl text-gray-300 mb-8">A creative technologist, blending robotics, video, and code to build innovative projects with purpose and impact.</p>
+            
+            <div class="flex flex-wrap justify-center gap-4">
+                <button id="start-quest" class="game-font px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    START ADVENTURE
+                </button>
+                <button id="view-skills" class="game-font px-6 py-3 bg-transparent border-2 border-green-500 text-green-500 rounded-lg hover:bg-green-500 hover:text-white transition">
+                    VIEW SKILLS
+                </button>
+            </div>
+            
+            <div class="mt-12 game-font text-xs text-gray-400 animate-pulse">
+                Scroll down to explore
+                <div class="mt-2">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="game-font text-4xl text-purple-400 mb-4">MY PROJECTS</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">My playground of robotics, automation, video, and web projects, fueled by curiosity and grit.</p>
+                <div class="mt-6 achievement" id="achievement-explorer">
+                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trophy mr-2"></i> Achievement: Explorer
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
+                <!-- Project 1: Self-Designed Robot Arm -->
+                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg h-96">
+                    <div class="card-flip h-full">
+                        <div class="card-front h-full">
+                            <div class="bg-gray-900 h-48 flex items-center justify-center">
+                                <i class="fas fa-robot text-6xl text-purple-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <div class="game-font text-purple-400 text-xs mb-2">ROBOTICS & 3D DESIGN</div>
+                                <h3 class="text-xl font-bold mb-2">Self-Designed Robot Arm</h3>
+                                <p class="text-gray-400">A 6-degree-of-freedom robot arm I designed from scratch, blending creativity and tech. Built for precise object manipulation using 3D-printed parts and custom code.</p>
+                            </div>
+                        </div>
+                        <div class="card-back h-full bg-gray-800 p-6">
+                            <div class="game-font text-purple-400 text-xs mb-2">PROJECT DETAILS</div>
+                            <h3 class="text-xl font-bold mb-4">Self-Designed Robot Arm</h3>
+                            <ul class="text-gray-300 space-y-2">
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Custom 3D design</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Arduino-based control</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Basic computer vision</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> 3D-printed components</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="game-font text-xs text-purple-400">TECH STACK:</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Blender</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Arduino</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Python</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">3D Printing</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 2: Twitter Automation Bot -->
+                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg h-96">
+                    <div class="card-flip h-full">
+                        <div class="card-front h-full">
+                            <div class="bg-gray-900 h-48 flex items-center justify-center">
+                                <i class="fab fa-twitter text-6xl text-blue-500"></i>
+                            </div>
+                            <div class="p-6">
+                                <div class="game-font text-blue-400 text-xs mb-2">AUTOMATION</div>
+                                <h3 class="text-xl font-bold mb-2">Twitter Automation Bot</h3>
+                                <p class="text-gray-400">A bot that autonomously generates and schedules tweets, built to dive into social media automation.</p>
+                            </div>
+                        </div>
+                        <div class="card-back h-full bg-gray-800 p-6">
+                            <div class="game-font text-blue-400 text-xs mb-2">PROJECT DETAILS</div>
+                            <h3 class="text-xl font-bold mb-4">Twitter Automation Bot</h3>
+                            <ul class="text-gray-300 space-y-2">
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> AI-driven content</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Scheduling</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Basic analytics</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Script refinement</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="game-font text-xs text-purple-400">TECH STACK:</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Python</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Twitter API</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 3: Short-Form Video Content -->
+                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg h-96">
+                    <div class="card-flip h-full">
+                        <div class="card-front h-full">
+                            <div class="bg-gray-900 h-48 flex items-center justify-center">
+                                <i class="fas fa-video text-6xl text-green-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <div class="game-font text-green-400 text-xs mb-2">VIDEO EDITING</div>
+                                <h3 class="text-xl font-bold mb-2">Short-Form Video Content</h3>
+                                <p class="text-gray-400">Engaging short-form videos crafted for social media platforms like Instagram Reels, designed to captivate audiences.</p>
+                            </div>
+                        </div>
+                        <div class="card-back h-full bg-gray-800 p-6">
+                            <div class="game-font text-green-400 text-xs mb-2">PROJECT DETAILS</div>
+                            <h3 class="text-xl font-bold mb-4">Short-Form Video Content</h3>
+                            <ul class="text-gray-300 space-y-2">
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Dynamic visuals</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Precise editing</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Audience engagement</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Platform optimization</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="game-font text-xs text-purple-400">TECH STACK:</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">AI Video Tools</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Premiere</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Canva</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Project 4: Web Prototypes -->
+                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg h-96">
+                    <div class="card-flip h-full">
+                        <div class="card-front h-full">
+                            <div class="bg-gray-900 h-48 flex items-center justify-center">
+                                <i class="fas fa-globe text-6xl text-blue-400"></i>
+                            </div>
+                            <div class="p-6">
+                                <div class="game-font text-blue-400 text-xs mb-2">WEB DESIGN</div>
+                                <h3 class="text-xl font-bold mb-2">Web Prototypes for Creators</h3>
+                                <p class="text-gray-400">Sample sites for an astrologer, health coach, and energy healer, exploring AI-driven web creation.</p>
+                            </div>
+                        </div>
+                        <div class="card-back h-full bg-gray-800 p-6">
+                            <div class="game-font text-blue-400 text-xs mb-2">PROJECT DETAILS</div>
+                            <h3 class="text-xl font-bold mb-4">Web Prototypes for Creators</h3>
+                            <ul class="text-gray-300 space-y-2">
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Frontend mockups</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Basic Python experiments</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> No-code tool exploration</li>
+                                <li><i class="fas fa-check-circle text-green-500 mr-2"></i> Deployment learning</li>
+                            </ul>
+                            <div class="mt-4">
+                                <div class="game-font text-xs text-purple-400">TECH STACK:</div>
+                                <div class="flex flex-wrap gap-2 mt-2">
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">AI Builders</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">Python</span>
+                                    <span class="px-2 py-1 bg-gray-700 rounded text-xs">HTML/CSS</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section (Removed Skill Tree) -->
+    <section id="skills" class="py-20">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="game-font text-4xl text-green-400 mb-4">MY SKILLS</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">A showcase of my technical and creative skills, honed through hands-on projects and a curious spirit.</p>
+                <div class="mt-6 achievement" id="achievement-skillmaster">
+                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trophy mr-2"></i> Achievement: Skill Master
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="game-font text-xl text-purple-400 mb-4">Technical Skills</h3>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="85">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Automation & Robotics</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="85%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Programmed PLCs and a Mitsubishi robot arm during a year-long course. Built a custom robot arm with Arduino and Python, integrating basic computer vision.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="70">
+                        <div class="mb-2">
+                            <span class="text-gray-300">3D Design</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="70%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Designed and 3D-printed a functional robot arm using Blender. Comfortable with mechanical designs, still growing in complex modeling.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="75">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Video Editing</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="75%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Experienced in cutting and assembling videos with basic transitions, including content for spiritual and tech topics.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="80">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Coding</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="80%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Write and refine Python scripts for automation, like Twitter bots, with some experience in C/C++ for Arduino and basic JavaScript for web tweaks.</p>
+                    </div>
+                    
+                    <div class="skill-item" data-skill-level="90">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Creative Problem-Solving</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="90%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Blend technical skills with an artistic mindset to prototype ideas, from digital tools to physical builds.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="game-font text-xl text-green-400 mb-4">Programming Languages</h3>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="85">
+                        <div class="flex items-center mb-2">
+                            <i class="fab fa-python text-blue-500 mr-2"></i>
+                            <span class="text-gray-300">Python</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="85%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Self-taught, used for automation scripts, bots, and Arduino projects.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="60">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-code text-green-500 mr-2"></i>
+                            <span class="text-gray-300">C/C++</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="60%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Explored through automation courses and Arduino programming, still growing.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="50">
+                        <div class="flex items-center mb-2">
+                            <i class="fab fa-js text-yellow-400 mr-2"></i>
+                            <span class="text-gray-300">JavaScript</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="50%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Basic tweaks for web projects, not a core strength.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="65">
+                        <div class="flex items-center mb-2">
+                            <i class="fab fa-swift text-orange-500 mr-2"></i>
+                            <span class="text-gray-300">Swift</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="65%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Used for iOS app prototypes, focusing on clean and efficient code.</p>
+                    </div>
+                    
+                    <div class="skill-item" data-skill-level="75">
+                        <div class="flex items-center mb-2">
+                            <i class="fab fa-html5 text-blue-400 mr-2"></i>
+                            <span class="text-gray-300">HTML & CSS (Tailwind)</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="75%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Crafted responsive web interfaces with Tailwind CSS for modern designs.</p>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-6 rounded-lg">
+                    <h3 class="game-font text-xl text-blue-400 mb-4">Soft Skills</h3>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="80">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Communication</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="80%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Charismatic storyteller with a multicultural lens, connecting through clarity and passion.</p>
+                    </div>
+                    
+                    <div class="mb-4 skill-item" data-skill-level="85">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Adaptability</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="85%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Thrive on learning new tools, from 3D printers to video editors, through experimentation.</p>
+                    </div>
+                    
+                    <div class="skill-item" data-skill-level="90">
+                        <div class="mb-2">
+                            <span class="text-gray-300">Creative Vision</span>
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-bar" data-width="90%"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Fuse tech, art, and spirituality to craft projects with purpose.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="game-font text-4xl text-yellow-400 mb-4">SERVICES</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">Hire me to bring your technological needs to reality</p>
+                <div class="mt-6 achievement" id="achievement-service">
+                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trophy mr-2"></i> Achievement: Service Discoverer
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Service 1: IT Support -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-laptop-medical"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-blue-400 mb-3">IT SUPPORT</h3>
+                    <p class="text-gray-300 mb-4">Professional technical support for businesses and individuals. Hardware troubleshooting, software installation, network setup and more.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$75/hour</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Service 2: 3D Design -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-purple-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-purple-400 mb-3">3D DESIGN</h3>
+                    <p class="text-gray-300 mb-4">Custom 3D modeling and design services for prototyping, manufacturing, visualization, and 3D printing. From concept to finished model.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$150/project</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Service 3: AI Video Generation -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-green-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-green-400 mb-3">AI VIDEO GENERATION</h3>
+                    <p class="text-gray-300 mb-4">State-of-the-art AI-generated video content for advertisements, presentations, and marketing. Custom animations and visuals tailored to your brand.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$350/video</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Service 4: Custom Robotics -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-red-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-red-400 mb-3">CUSTOM ROBOTICS</h3>
+                    <p class="text-gray-300 mb-4">Bespoke robotic solutions for your business or personal project. From concept to finished product, including programming and controls.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$2000/project</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Service 5: App Development -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-indigo-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-indigo-400 mb-3">APP DEVELOPMENT</h3>
+                    <p class="text-gray-300 mb-4">Full-stack mobile and web application development. From simple informational apps to complex multi-platform systems.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$3000/app</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Service 6: IoT Solutions -->
+                <div class="bg-gray-800 rounded-lg p-6 hover:bg-gray-700 transition">
+                    <div class="w-16 h-16 mb-6 rounded-full bg-yellow-500 flex items-center justify-center text-white text-2xl">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <h3 class="game-font text-xl text-yellow-400 mb-3">IOT SOLUTIONS</h3>
+                    <p class="text-gray-300 mb-4">Internet of Things implementation for smart homes, offices, and industrial applications. Custom sensors, automation, and monitoring systems.</p>
+                    <div class="mt-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-400">Starting at:</span>
+                            <span class="text-white font-bold">$1500/project</span>
+                        </div>
+                        <button class="w-full game-font mt-4 px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 transition">
+                            SELECT
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16">
+                <h3 class="game-font text-2xl text-center text-purple-400 mb-8">QUEST BOARD</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div id="quest-1" class="quest p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-tasks"></i>
+                            </div>
+                            <div>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">Explore All Projects</h4>
+                                <p class="text-sm text-gray-300 mb-3">Visit all project cards to understand the full scope of Julius's work.</p>
+                                <div class="flex items-center">
+                                    <div class="text-xs text-gray-400 mr-2">Progress:</div>
+                                    <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div id="quest-1-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-2">0/4</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="quest-2" class="quest p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-sitemap"></i>
+                            </div>
+                            <div>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Skills</h4>
+                                <p class="text-sm text-gray-300 mb-3">Explore the skills section to understand Julius's capabilities.</p>
+                                <div class="flex items-center">
+                                    <div class="text-xs text-gray-400 mr-2">Progress:</div>
+                                    <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div id="quest-2-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-2">0/1</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="quest-3" class="quest p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-store"></i>
+                            </div>
+                            <div>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">Review All Services</h4>
+                                <p class="text-sm text-gray-300 mb-3">Check out the full range of services offered by Julius.</p>
+                                <div class="flex items-center">
+                                    <div class="text-xs text-gray-400 mr-2">Progress:</div>
+                                    <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div id="quest-3-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-2">0/6</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="quest-4" class="quest p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">Find All Achievements</h4>
+                                <p class="text-sm text-gray-300 mb-3">Discover all hidden achievements throughout the site.</p>
+                                <div class="flex items-center">
+                                    <div class="text-xs text-gray-400 mr-2">Progress:</div>
+                                    <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div id="quest-4-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-2">0/5</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-4 bg-gray-900">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="game-font text-4xl text-blue-400 mb-4">CONTACT ME</h2>
+                <p class="text-gray-300 max-w-2xl mx-auto">Ready to start your tech journey? Let's connect!</p>
+                <div class="mt-6 achievement" id="achievement-networker">
+                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trophy mr-2"></i> Achievement: Networker
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-800 rounded-lg overflow-hidden">
+                <div class="grid grid-cols-1 md:grid-cols-2">
+                    <div class="p-8">
+                        <h3 class="game-font text-xl text-green-400 mb-6">SEND MESSAGE</h3>
+                        
+                        <form class="space-y-4">
+                            <div>
+                                <label class="block text-gray-400 text-sm mb-2" for="name">Your Name</label>
+                                <input class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" type="text" id="name" placeholder="Enter your name">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-400 text-sm mb-2" for="email">Your Email</label>
+                                <input class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" type="email" id="email" placeholder="Enter your email">
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-400 text-sm mb-2" for="subject">Subject</label>
+                                <select class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" id="subject">
+                                    <option>Project Inquiry</option>
+                                    <option>Service Request</option>
+                                    <option>Collaboration</option>
+                                    <option>General Question</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-400 text-sm mb-2" for="message">Message</label>
+                                <textarea class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 h-32" id="message" placeholder="Enter your message"></textarea>
+                            </div>
+                            
+                            <button id="send-message" type="button" class="game-font w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                                SEND MESSAGE
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="bg-gray-900 p-8 flex flex-col justify-between">
+                        <div>
+                            <h3 class="game-font text-xl text-purple-400 mb-6">CONTACT INFO</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
+                                        <i class="fas fa-envelope text-purple-300"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-gray-400 text-sm">Email</div>
+                                        <div class="text-white"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0c6b7975666d61697f66796065797f4c6b616d6560226f6361">[email&#160;protected]</a></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
+                                        <i class="fas fa-phone text-purple-300"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-gray-400 text-sm">Phone</div>
+                                        <div class="text-white">+1 (555) 123-4567</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
+                                        <i class="fas fa-map-marker-alt text-purple-300"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-gray-400 text-sm">Location</div>
+                                        <div class="text-white">Berlin, Germany</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="flex items-start">
+                                    <div class="w-10 h-10 rounded-full bg-purple-800 flex items-center justify-center mr-4 mt-1">
+                                        <i class="fas fa-clock text-purple-300"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-gray-400 text-sm">Working Hours</div>
+                                        <div class="text-white">Mon - Fri: 9am - 6pm PST</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <div class="text-gray-400 text-sm mb-3">Connect with me</div>
+                            <div class="flex space-x-4">
+                                <a href="#" class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-blue-800 transition">
+                                    <i class="fab fa-linkedin-in text-blue-300"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                                    <i class="fab fa-github text-white"></i>
+                                </a>
+                                <a href="#" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition">
+                                    <i class="fab fa-instagram text-white"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center">
+                <div id="achievement-completionist" class="achievement">
+                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-trophy mr-2"></i> Achievement: Completionist
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 py-10 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="game-font text-purple-400 text-xl">JULIUS GUY-JAMES</div>
+                    <div class="text-gray-400 text-sm">Creative Tech Generalist</div>
+                </div>
+                
+                <div class="text-center md:text-right">
+                    <div class="flex justify-center md:justify-end space-x-4 mb-4">
+                        <a href="#hero" class="text-gray-400 hover:text-white transition">Home</a>
+                        <a href="#projects" class="text-gray-400 hover:text-white transition">Projects</a>
+                        <a href="#skills" class="text-gray-400 hover:text-white transition">Skills</a>
+                        <a href="#services" class="text-gray-400 hover:text-white transition">Services</a>
+                        <a href="#contact" class="text-gray-400 hover:text-white transition">Contact</a>
+                    </div>
+                    <div class="text-gray-500 text-xs">
+                        &copy; 2025 Julius Guy-James. All rights reserved.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cloudflare Scripts -->
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930842279f776a77',t:'MTc0NDY4NjcxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+    <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9343a286feabbae3',t:'MTc0NTMwOTMyMy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+
+    <!-- Main JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>

@@ -181,7 +181,35 @@
             font-size: 0.8rem;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
+        
+        /* Welcome Message Styles */
+        #welcome-message {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
 
+        #welcome-message.show {
+            opacity: 1;
+        }
+
+        #welcome-message .glow {
+            animation: glow 1.5s infinite alternate;
+        }
+
+        #welcome-particle-canvas {
+            z-index: 51; /* Above modal but below content */
+        }
+
+        /* Particle burst animation */
+        .welcome-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 52;
+        }
+        
         .tooltip:hover .tooltiptext {
             visibility: visible;
             opacity: 1;
@@ -324,6 +352,17 @@
                 <span class="tooltiptext">Complete quests to gain experience!</span>
             </div>
         </div>
+    </div>
+
+    <!-- Welcome Message Box -->
+    <div id="welcome-message" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-70"></div>
+        <div class="relative bg-gray-900 border-4 border-purple-600 rounded-xl p-8 max-w-md w-full mx-4 text-center shadow-2xl glow">
+            <h2 class="game-font text-3xl text-yellow-400 mb-4">Welcome, Adventurer!</h2>
+            <p class="game-font text-lg text-green-400 mb-6">Explore to unlock achievements! Scroll, hover, and interact to level up!</p>
+            <button id="start-adventure" class="game-font px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition glow">START ADVENTURE</button>
+        </div>
+        <canvas id="welcome-particle-canvas" class="absolute inset-0 pointer-events-none"></canvas>
     </div>
 
     <!-- Achievement notification banner -->
@@ -1005,6 +1044,100 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             emailjs.init('3aimvoUWnig58tBKe');
+            // Welcome message box with particle animation
+            function showWelcomeMessage() {
+                // Check if the user has seen the welcome message before
+                if (!localStorage.getItem('hasSeenWelcomeMessage')) {
+                    const welcomeMessage = document.getElementById('welcome-message');
+                    const startButton = document.getElementById('start-adventure');
+                    const particleCanvas = document.getElementById('welcome-particle-canvas');
+                    const ctx = particleCanvas.getContext('2d');
+
+                    // Set canvas dimensions
+                    function resizeCanvas() {
+                        particleCanvas.width = window.innerWidth;
+                        particleCanvas.height = window.innerHeight;
+                    }
+                    resizeCanvas();
+                    window.addEventListener('resize', resizeCanvas);
+
+                    // Show the welcome message
+                    welcomeMessage.classList.remove('hidden');
+                    welcomeMessage.classList.add('show');
+
+                    // Particle burst animation
+                    const particles = [];
+                    class Particle {
+                        constructor(x, y) {
+                            this.x = x;
+                            this.y = y;
+                            this.size = Math.random() * 5 + 3;
+                            this.color = ['#6d28d9', '#10b981', '#f59e0b'][Math.floor(Math.random() * 3)]; // Use theme colors
+                            this.vx = Math.random() * 8 - 4;
+                            this.vy = Math.random() * 8 - 4;
+                            this.opacity = 1;
+                            this.gravity = 0.1;
+                        }
+
+                        update() {
+                            this.x += this.vx;
+                            this.y += this.vy + this.gravity;
+                            this.opacity -= 0.02;
+                            this.gravity += 0.05;
+                        }
+
+                        draw() {
+                            ctx.fillStyle = `${this.color}${Math.floor(this.opacity * 255).toString(16).padStart(2, '0')}`;
+                            ctx.beginPath();
+                            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                            ctx.fill();
+                        }
+                    }
+
+                    function createParticleBurst(x, y) {
+                        for (let i = 0; i < 50; i++) {
+                            particles.push(new Particle(x, y));
+                        }
+
+                        function animateParticles() {
+                            ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                            particles.forEach((particle, index) => {
+                                particle.update();
+                                particle.draw();
+                                if (particle.opacity <= 0) {
+                                    particles.splice(index, 1);
+                                }
+                            });
+                            if (particles.length > 0) {
+                                requestAnimationFrame(animateParticles);
+                            }
+                        }
+                        animateParticles();
+                    }
+
+                    // Handle button click
+                    startButton.addEventListener('click', () => {
+                        // Trigger particle burst at button center
+                        const buttonRect = startButton.getBoundingClientRect();
+                        const x = buttonRect.left + buttonRect.width / 2;
+                        const y = buttonRect.top + buttonRect.height / 2;
+                        createParticleBurst(x, y);
+
+                        // Fade out welcome message
+                        welcomeMessage.classList.remove('show');
+                        setTimeout(() => {
+                            welcomeMessage.classList.add('hidden');
+                            localStorage.setItem('hasSeenWelcomeMessage', 'true'); // Mark as seen
+                        }, 500); // Match fade-out duration
+
+                        // Add some EXP for starting the adventure
+                        addExp(10);
+                    });
+                }
+            }
+
+            // Call the function after DOM is loaded
+            showWelcomeMessage();
             // Initialize canvas for dynamic background
             const canvas = document.getElementById('background-canvas');
             const ctx = canvas.getContext('2d');

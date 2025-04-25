@@ -232,22 +232,6 @@
         .banner.show {
             top: 20px;
         }
-        
-        /* For continuity in PDF export */
-         {
-            body {
-                width: 100%;
-                height: auto;
-                overflow: visible;
-                background-color: white;
-                color: black;
-            }
-
-            section {
-                page-break-inside: avoid;
-                margin-bottom: 20px;
-            }
-        }
 
         /* Dynamic Background Styles */
         #background-canvas {
@@ -1017,9 +1001,10 @@
         </div>
         <canvas id="confetti-canvas" class="absolute inset-0"></canvas>
     </div>
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            emailjs.init('3aimvoUWnig58tBKe');
             // Initialize canvas for dynamic background
             const canvas = document.getElementById('background-canvas');
             const ctx = canvas.getContext('2d');
@@ -1548,7 +1533,6 @@
             window.addEventListener('scroll', function() {
                 const scrollPosition = window.pageYOffset;
                 const parallaxLayers = document.querySelectorAll('.parallax-layer');
-                
                 parallaxLayers.forEach(layer => {
                     const speed = layer.getAttribute('data-speed');
                     layer.style.transform = `translateY(${scrollPosition * speed}px)`;
@@ -1561,33 +1545,40 @@
                         unlockAchievement('achievement-explorer', 'Explorer');
                     }
                 });
-                
-                // Check for section content visibility to start timers and update quests
-                const sections = [
-                    { id: 'projects', element: document.querySelector('#projects .grid'), quest: 'quest-1' },
-                    { id: 'skills', element: document.querySelector('#skills .grid'), quest: 'quest-2' },
-                    { id: 'services', element: document.querySelector('#services .grid'), quest: 'quest-3' },
-                    { id: 'contact', element: document.querySelector('#contact .max-w-lg'), quest: 'quest-4' }
-                ];
-                
+                // Replaced section viewing logic
+                const viewedSections = {
+                    projects: projectsSectionViewed,
+                    skills: skillsSectionViewed,
+                    services: servicesSectionViewed,
+                    contact: contactSectionViewed
+                };
                 sections.forEach(section => {
                     if (section.element) {
                         const isVisible = isElementInViewport(section.element);
-                        const viewedVariable = `${section.id}SectionViewed`;
-                        
-                        if (isVisible && !window[viewedVariable]) {
+                        if (isVisible) {
+                            console.log(`${section.id} section content is in viewport`);
+                        }
+                        if (isVisible && !viewedSections[section.id]) {
                             if (!viewTimers[section.id]) {
+                                console.log(`Starting timer for ${section.id} section`);
                                 viewTimers[section.id] = setTimeout(() => {
-                                    window[viewedVariable] = true;
+                                    viewedSections[section.id] = true;
+                                    if (section.id === 'projects') projectsSectionViewed = true;
+                                    if (section.id === 'skills') skillsSectionViewed = true;
+                                    if (section.id === 'services') servicesSectionViewed = true;
+                                    if (section.id === 'contact') contactSectionViewed = true;
                                     console.log(`${section.id} section viewed for 3 seconds!`);
                                     viewTimers[section.id] = null;
                                     updateQuestProgress(section.quest, 1, 1);
                                 }, 3000);
                             }
                         } else if (!isVisible && viewTimers[section.id]) {
+                            console.log(`Clearing timer for ${section.id} section`);
                             clearTimeout(viewTimers[section.id]);
                             viewTimers[section.id] = null;
                         }
+                    } else {
+                        console.error(`Element for ${section.id} not found! Selector: ${section.element}`);
                     }
                 });
             });
@@ -1669,16 +1660,13 @@
                 });
                 // Project card hover tracking for Project Flipper
                 const projectCards = document.querySelectorAll('.project-card');
-                console.log(`Found ${projectCards.length} project cards`);
                 projectCards.forEach((card, index) => {
                     card.addEventListener('mouseenter', function() {
                         if (!this.classList.contains('explored')) {
                             this.classList.add('explored');
                             projectsExplored++;
-                            console.log(`Project card ${index + 1} explored, total: ${projectsExplored}`);
                             addExp(15);
                             if (projectsExplored >= 4) {
-                                console.log('Triggering Project Flipper achievement');
                                 unlockAchievement('achievement-flipper', 'Project Flipper');
                             }
                         }
@@ -1728,21 +1716,36 @@
             document.getElementById('send-message').addEventListener('click', function() {
                 const nameField = document.getElementById('name');
                 const emailField = document.getElementById('email');
+                const subjectField = document.getElementById('subject');
                 const messageField = document.getElementById('message');
                 
                 if (nameField.value && emailField.value && messageField.value) {
                     this.textContent = 'SENDING...';
+                    this.disabled = true;
                     
-                    setTimeout(() => {
-                        this.textContent = 'MESSAGE SENT!';
-                        this.disabled = true;
-                        this.classList.add('bg-green-800');
-                        addExp(30);
-                        showBanner('custom', 'Message sent successfully!');
-                        unlockAchievement('achievement-networker', 'Networker');
-                    }, 1500);
+                    const templateParams = {
+                        name: nameField.value,
+                        email: emailField.value,
+                        subject: subjectField.value,
+                        message: messageField.value
+                    };
+                    
+                    emailjs.send('service_0w4mbpe', 'template_mtttn0q', templateParams)
+                        .then(() => {
+                            this.textContent = 'MESSAGE SENT!';
+                            this.classList.add('bg-green-800');
+                            addExp(30);
+                            showBanner('custom', 'Message sent successfully!');
+                            unlockAchievement('achievement-networker', 'Networker');
+                            document.getElementById('contact-form').reset(); // Clear the form
+                        }, (error) => {
+                            this.textContent = 'SEND MESSAGE';
+                            this.disabled = false;
+                            showBanner('custom', 'Failed to send message. Try again!');
+                            console.error('EmailJS error:', error);
+                        });
                 } else {
-                    showBanner('Please fill all required fields');
+                    showBanner('custom', 'Please fill all required fields');
                 }
             });
             
@@ -1782,6 +1785,5 @@
             };
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'930842279f776a77',t:'MTc0NDY4NjcxNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

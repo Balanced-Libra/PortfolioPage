@@ -134,27 +134,24 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
-        .pixel-border {
-            box-shadow: 
-                0 0 0 2px #fff,
-                0 0 0 4px #000;
-            image-rendering: pixelated;
+
+        @keyframes pulse {
+            0% {
+                background: linear-gradient(90deg, #4c1d95, #8b5cf6);
+                box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+            }
+            50% {
+                background: linear-gradient(90deg, #ffd700, #ffea00);
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            }
+            100% {
+                background: linear-gradient(90deg, #4c1d95, #8b5cf6);
+                box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+            }
         }
-        
-        .exp-bar {
-            position: relative;
-            height: 20px;
-            background: #374151;
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .exp-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4c1d95, #8b5cf6);
-            width: 0%;
-            transition: width 1.5s ease;
+
+        .pulse {
+            animation: pulse 2s ease-in-out;
         }
 
         /* Tooltip Styles */
@@ -292,7 +289,32 @@
             pointer-events: none;
             z-index: 9999;
         }
-    </style>
+        /* Game Complete Celebration */
+        #game-complete-celebration {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        #game-complete-celebration.show {
+            opacity: 1;
+        }
+        .exp-bar {
+            position: relative;
+            height: 20px;
+            background: #374151;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4c1d95, #8b5cf6);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+        .pulse {
+            animation: pulse 2s ease-in-out;
+        }
+        </style>
 </head>
 <body>
     <!-- Dynamic Background Canvas -->
@@ -314,7 +336,7 @@
                 <span class="tooltiptext">Unlock achievements by exploring the site!</span>
             </div>
             <div class="tooltip">
-                <div class="game-font text-xs text-green-400"><i class="fas fa-scroll mr-1"></i><span id="quests-count">0</span>/4</div>
+                <div class="game-font text-xs text-green-400"><i class="fas fa-scroll mr-1"></i><span id="quests-count">0</span>/5</div>
                 <span class="tooltiptext">Complete quests to gain experience!</span>
             </div>
         </div>
@@ -361,7 +383,7 @@
                 </button>
             </div>
             
-            <div class="mt-12 game-font text-xs text-gray-400 animate-pulse">
+            <div class="mt-12 game-font text-xs text-gray-400">
                 Scroll down to explore
                 <div class="mt-2">
                     <i class="fas fa-chevron-down"></i>
@@ -376,11 +398,6 @@
             <div class="text-center mb-16">
                 <h2 class="game-font text-4xl text-purple-400 mb-4">MY PROJECTS</h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">My playground of robotics, automation, video, and web projects, fueled by curiosity and grit.</p>
-                <div class="mt-6 achievement" id="achievement-explorer">
-                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-trophy mr-2"></i> Achievement: Explorer
-                    </div>
-                </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
@@ -498,7 +515,7 @@
                             <div class="p-6">
                                 <div class="game-font text-blue-400 text-xs mb-2">WEB DESIGN</div>
                                 <h3 class="text-xl font-bold mb-2">Web Prototypes for Creators</h3>
-                                <p class="text-gray-400">Sample websites.</p>
+                                <p class="text-gray-400">Sample sites for an astrologer, health coach, and energy healer, exploring AI-driven web creation.</p>
                             </div>
                         </div>
                         <div class="card-back h-full bg-gray-800 p-6">
@@ -531,11 +548,7 @@
             <div class="text-center mb-16">
                 <h2 class="game-font text-4xl text-green-400 mb-4">MY SKILLS</h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">A showcase of my technical and creative skills, honed through hands-on projects and a curious spirit.</p>
-                <div class="mt-6 achievement" id="achievement-skillmaster">
-                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-trophy mr-2"></i> Achievement: Skill Master
-                    </div>
-                </div>
+                
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-12">
@@ -569,7 +582,7 @@
                         <div class="progress-container">
                             <div class="progress-bar" data-width="75%"></div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">Experienced in cutting and assembling videos with basic transitions.</p>
+                        <p class="text-xs text-gray-400 mt-1">Experienced in cutting and assembling videos with basic transitions, including content for spiritual and tech topics.</p>
                     </div>
                     
                     <div class="mb-4 skill-item" data-skill-level="80">
@@ -662,7 +675,7 @@
                         <div class="progress-container">
                             <div class="progress-bar" data-width="80%"></div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">Charismatic storyteller with a multicultural lens.</p>
+                        <p class="text-xs text-gray-400 mt-1">Charismatic storyteller with a multicultural lens, connecting through clarity and passion.</p>
                     </div>
                     
                     <div class="mb-4 skill-item" data-skill-level="85">
@@ -672,7 +685,7 @@
                         <div class="progress-container">
                             <div class="progress-bar" data-width="85%"></div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">I thrive on learning new tools, if the skill you might need is not listed, I'm always up for a new challenge!</p>
+                        <p class="text-xs text-gray-400 mt-1">Thrive on learning new tools, from 3D printers to video editors, through experimentation.</p>
                     </div>
                     
                     <div class="skill-item" data-skill-level="90">
@@ -682,7 +695,7 @@
                         <div class="progress-container">
                             <div class="progress-bar" data-width="90%"></div>
                         </div>
-                        <p class="text-xs text-gray-400 mt-1">I fuse tech and creativity to craft visually appealing projects with purpose.</p>
+                        <p class="text-xs text-gray-400 mt-1">Fuse tech, art, and spirituality to craft projects with purpose.</p>
                     </div>
                 </div>
             </div>
@@ -695,11 +708,6 @@
             <div class="text-center mb-16">
                 <h2 class="game-font text-4xl text-yellow-400 mb-4">SERVICES</h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">Hire me to bring your technological needs to reality</p>
-                <div class="mt-6 achievement" id="achievement-service">
-                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-trophy mr-2"></i> Achievement: Service Discoverer
-                    </div>
-                </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -822,14 +830,14 @@
                                 <i class="fas fa-tasks"></i>
                             </div>
                             <div>
-                                <h4 class="game-font text-lg text-yellow-400 mb-2">Explore All Projects</h4>
-                                <p class="text-sm text-gray-300 mb-3">Visit all project cards to understand the full scope of Julius's work.</p>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Projects Section</h4>
+                                <p class="text-sm text-gray-300 mb-3">Spend a few seconds exploring the Projects section to learn about Julius's work.</p>
                                 <div class="flex items-center">
                                     <div class="text-xs text-gray-400 mr-2">Progress:</div>
                                     <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
                                         <div id="quest-1-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
                                     </div>
-                                    <div class="text-xs text-gray-400 ml-2">0/4</div>
+                                    <div class="text-xs text-gray-400 ml-2">0/1</div>
                                 </div>
                             </div>
                         </div>
@@ -841,8 +849,8 @@
                                 <i class="fas fa-sitemap"></i>
                             </div>
                             <div>
-                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Skills</h4>
-                                <p class="text-sm text-gray-300 mb-3">Explore the skills section to understand Julius's capabilities.</p>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Skills Section</h4>
+                                <p class="text-sm text-gray-300 mb-3">Spend a few seconds in the Skills section to see Julius's capabilities.</p>
                                 <div class="flex items-center">
                                     <div class="text-xs text-gray-400 mr-2">Progress:</div>
                                     <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
@@ -860,20 +868,39 @@
                                 <i class="fas fa-store"></i>
                             </div>
                             <div>
-                                <h4 class="game-font text-lg text-yellow-400 mb-2">Review All Services</h4>
-                                <p class="text-sm text-gray-300 mb-3">Check out the full range of services offered by Julius.</p>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Services Section</h4>
+                                <p class="text-sm text-gray-300 mb-3">Spend a few seconds exploring the Services section to see what Julius offers.</p>
                                 <div class="flex items-center">
                                     <div class="text-xs text-gray-400 mr-2">Progress:</div>
                                     <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
                                         <div id="quest-3-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
                                     </div>
-                                    <div class="text-xs text-gray-400 ml-2">0/6</div>
+                                    <div class="text-xs text-gray-400 ml-2">0/1</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     
                     <div id="quest-4" class="quest p-4 rounded-lg">
+                        <div class="flex items-start">
+                            <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div>
+                                <h4 class="game-font text-lg text-yellow-400 mb-2">View Network Section</h4>
+                                <p class="text-sm text-gray-300 mb-3">Spend a few seconds in the Contact section to explore networking options.</p>
+                                <div class="flex items-center">
+                                    <div class="text-xs text-gray-400 mr-2">Progress:</div>
+                                    <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div id="quest-4-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                    </div>
+                                    <div class="text-xs text-gray-400 ml-2">0/1</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="quest-5" class="quest p-4 rounded-lg">
                         <div class="flex items-start">
                             <div class="quest-icon w-12 h-12 flex items-center justify-center mr-4">
                                 <i class="fas fa-trophy"></i>
@@ -884,7 +911,7 @@
                                 <div class="flex items-center">
                                     <div class="text-xs text-gray-400 mr-2">Progress:</div>
                                     <div class="w-32 h-2 bg-gray-700 rounded-full overflow-hidden">
-                                        <div id="quest-4-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
+                                        <div id="quest-5-progress" class="h-full bg-yellow-500" style="width: 0%"></div>
                                     </div>
                                     <div class="text-xs text-gray-400 ml-2">0/5</div>
                                 </div>
@@ -893,27 +920,21 @@
                     </div>
                 </div>
             </div>
-        </div>
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="py-20 px-4 bg-gray-900">
-        <div class="max-w-4xl mx-auto">
+    <section id="contact" class="py-20 px-4">
+        <div class="max-w-lg mx-auto">
             <div class="text-center mb-16">
                 <h2 class="game-font text-4xl text-blue-400 mb-4">CONTACT ME</h2>
                 <p class="text-gray-300 max-w-2xl mx-auto">Ready to start your tech journey? Let's connect!</p>
-                <div class="mt-6 achievement" id="achievement-networker">
-                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-trophy mr-2"></i> Achievement: Networker
-                    </div>
-                </div>
             </div>
             
             <div class="bg-gray-800 rounded-lg overflow-hidden">
-                <div class="flex flex-col items-center">
-                    <div class="p-8 w-full max-w-lg">
-                        <h3 class="game-font text-xl text-green-400 mb-6">SEND MESSAGE</h3>
-                        <form class="space-y-4">
+                <div class="flex flex-col items-center pb-0.1">
+                    <div class="p-3 w-full max-w-sm">
+                        <h3 class="game-font text-xl text-green-400 mb-5">SEND MESSAGE</h3>
+                        <form class="space-y-3 max-w-sm">
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="name">Your Name</label>
                                 <input class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500" type="text" id="name" placeholder="Enter your name">
@@ -933,36 +954,31 @@
                             </div>
                             <div>
                                 <label class="block text-gray-400 text-sm mb-2" for="message">Message</label>
-                                <textarea class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 h-32" id="message" placeholder="Enter your message"></textarea>
+                                <textarea class="w-full px-3 py-2 bg-gray-700 text-white rounded focus:outline-none focus:ring-2 focus:ring-green-500 h-24" id="message" placeholder="Enter your message"></textarea>
                             </div>
                             <button id="send-message" type="button" class="game-font w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
                                 SEND MESSAGE
                             </button>
                         </form>
                     </div>
-                    <div class="mt-8">
-                        <div class="text-gray-400 text-sm mb-3 text-center">Connect with me</div>
-                        <div class="flex space-x-4 justify-center">
-                            <a href="https://www.linkedin.com/in/julius-guy-james" target="_blank" class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-blue-800 transition">
-                                <i class="fab fa-linkedin-in text-blue-300"></i>
-                            </a>
-                            <a href="https://github.com/Balanced-Libra" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
-                                <i class="fab fa-github text-white"></i>
-                            </a>
-                            <a href="#" target="_blank" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition">
-                                <i class="fab fa-instagram text-white"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                                
-            <div class="mt-16 text-center">
-                <div id="achievement-completionist" class="achievement">
-                    <div class="inline-block bg-yellow-600 text-white px-4 py-2 rounded-lg">
-                        <i class="fas fa-trophy mr-2"></i> Achievement: Completionist
-                    </div>
                 </div>
             </div>
+            <div class="mt-6 text-center">
+                <div class="text-gray-400 text-sm mb-2">Connect with me</div>
+                <div class="flex space-x-4 justify-center">
+                    <a href="https://www.linkedin.com/in/julius-guy-james" target="_blank" class="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center hover:bg-blue-800 transition">
+                        <i class="fab fa-linkedin-in text-blue-300"></i>
+                    </a>
+                    <a href="https://github.com/Balanced-Libra" target="_blank" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-gray-700 transition">
+                        <i class="fab fa-github text-white"></i>
+                    </a>
+                    <a href="#" target="_blank" class="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center hover:from-purple-600 hover:to-pink-600 transition">
+                        <i class="fab fa-instagram text-white"></i>
+                    </a>
+                </div>
+            </div>
+                                
+            
         </div>
     </section>
 
@@ -992,6 +1008,15 @@
     </footer>
 
     <!-- JavaScript for gamification elements and dynamic background -->
+     <!-- Game Complete Celebration -->
+    <div id="game-complete-celebration" class="fixed inset-0 flex items-center justify-center z-50 hidden">
+        <div class="absolute inset-0 bg-black bg-opacity-80"></div>
+        <div class="relative text-center">
+            <h2 class="game-font text-4xl md:text-6xl text-yellow-400 mb-4 glow">Game Complete!</h2>
+            <p class="game-font text-xl text-green-400">All Quests Conquered!</p>
+        </div>
+        <canvas id="confetti-canvas" class="absolute inset-0"></canvas>
+    </div>
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -1287,16 +1312,106 @@
             }
             
             animate();
-            
-            // Game functionality code (existing code)
+            // Confetti effect for Game Complete celebration
+            const confettiCanvas = document.getElementById('confetti-canvas');
+            const confettiCtx = confettiCanvas.getContext('2d');
+            const confettiParticles = [];
+            const confettiCount = 200;
+
+            function resizeConfettiCanvas() {
+                confettiCanvas.width = window.innerWidth;
+                confettiCanvas.height = window.innerHeight;
+            }
+
+            resizeConfettiCanvas();
+            window.addEventListener('resize', resizeConfettiCanvas);
+
+            class ConfettiParticle {
+                constructor() {
+                    this.x = Math.random() * confettiCanvas.width;
+                    this.y = -Math.random() * confettiCanvas.height; // Start above the screen
+                    this.size = Math.random() * 5 + 2;
+                    this.speedX = Math.random() * 2 - 1;
+                    this.speedY = Math.random() * 3 + 2;
+                    this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                    this.rotation = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 10 - 5;
+                }
+
+                update() {
+                    this.x += this.speedX;
+                    this.y += this.speedY;
+                    this.rotation += this.rotationSpeed;
+
+                    // Reset if off-screen
+                    if (this.y > confettiCanvas.height) {
+                        this.y = -this.size;
+                        this.x = Math.random() * confettiCanvas.width;
+                    }
+                }
+
+                draw() {
+                    confettiCtx.save();
+                    confettiCtx.translate(this.x, this.y);
+                    confettiCtx.rotate((this.rotation * Math.PI) / 180);
+                    confettiCtx.fillStyle = this.color;
+                    confettiCtx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                    confettiCtx.restore();
+                }
+            }
+
+            // Initialize confetti particles
+            for (let i = 0; i < confettiCount; i++) {
+                confettiParticles.push(new ConfettiParticle());
+            }
+
+            function animateConfetti() {
+                confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+                confettiParticles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+                requestAnimationFrame(animateConfetti);
+            }
+
+            // Function to show the Game Complete celebration
+            function showGameCompleteCelebration() {
+                const celebration = document.getElementById('game-complete-celebration');
+                celebration.classList.remove('hidden');
+                celebration.classList.add('show');
+                animateConfetti();
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    celebration.classList.remove('show');
+                    setTimeout(() => {
+                        celebration.classList.add('hidden');
+                    }, 500); // Match the fade-out transition duration
+                }, 5000);
+            }
+            // Game functionality code
             let level = 1;
             let exp = 0;
             let maxExp = 100;
             let achievements = 0;
             let quests = 0;
             let projectsExplored = 0;
-            let servicesViewed = 0;
-            let skillsViewed = false;
+            let skillsHovered = 0;
+            let hasSelectedService = false;
+            // Section viewing variables
+            let projectsSectionViewed = false;
+            let skillsSectionViewed = false;
+            let servicesSectionViewed = false;
+            let contactSectionViewed = false;
+            const unlockedAchievements = new Set();
+            let hasScrolled = false;
+            // Timer IDs to track viewing duration
+            const viewTimers = {
+                projects: null,
+                skills: null,
+                services: null,
+                contact: null
+            };
             
             // Update HUD displays
             function updateHUD() {
@@ -1310,18 +1425,53 @@
             function addExp(amount) {
                 exp += amount;
                 if (exp >= maxExp) {
-                    level++;
-                    exp = exp - maxExp;
-                    maxExp = Math.floor(maxExp * 1.5);
-                    showBanner(`Level Up! You're now level ${level}`);
+                    // Set the bar to 100% to start the fill animation (handled by CSS transition)
+                    const expFill = document.getElementById('exp-fill');
+                    expFill.style.width = '100%';
+
+                    // Immediately start the celebration (yellow glow)
+                    expFill.classList.add('pulse');
+
+                    // Handle multiple level-ups in a loop
+                    let levelsGained = 0;
+                    while (exp >= maxExp) {
+                        levelsGained++;
+                        exp -= maxExp;
+                        maxExp = Math.floor(maxExp * 2);
+                    }
+
+                    // Update level and reset the bar after the celebration (2 seconds)
+                    setTimeout(() => {
+                        console.log(`Level up! Gained ${levelsGained} levels. New level: ${level + levelsGained}, New maxExp: ${maxExp}`);
+                        level += levelsGained;
+                        expFill.classList.remove('pulse');
+                        updateHUD(); // Update HUD to show new level and EXP
+                    }, 2000); // 2 seconds celebration duration (matches the pulse animation)
+                } else {
+                    updateHUD(); // Update HUD immediately if not leveling up
                 }
-                updateHUD();
             }
             
             // Show achievement banner
-            function showBanner(message) {
+            function showBanner(type, message) {
                 const banner = document.getElementById('achievement-banner');
-                document.getElementById('achievement-name').textContent = message;
+                const bannerTitle = banner.querySelector('i').nextSibling; // The text node after the trophy icon
+                const bannerMessage = document.getElementById('achievement-name');
+                
+                // Clear previous content
+                bannerTitle.textContent = ' ';
+                bannerMessage.textContent = '';
+                
+                // Set the new message based on type
+                if (type === 'achievement') {
+                    bannerTitle.textContent = ' Achievement Unlocked! ';
+                } else if (type === 'quest') {
+                    bannerTitle.textContent = ' Quest Completed! ';
+                } else if (type === 'custom') {
+                    bannerTitle.textContent = ' ';
+                }
+                
+                bannerMessage.textContent = message;
                 banner.classList.add('show');
                 
                 setTimeout(() => {
@@ -1331,14 +1481,13 @@
             
             // Unlock achievement
             function unlockAchievement(id, name) {
-                const achievement = document.getElementById(id);
-                if (achievement && !achievement.classList.contains('unlocked')) {
-                    achievement.classList.add('unlocked');
+                if (!unlockedAchievements.has(id)) {
+                    unlockedAchievements.add(id);
                     achievements++;
                     updateHUD();
-                    showBanner(`Achievement: ${name}`);
+                    showBanner('achievement', name);
                     addExp(25);
-                    updateQuestProgress('quest-4', achievements, 5);
+                    updateQuestProgress('quest-5', achievements, 5);
                 }
             }
             
@@ -1357,13 +1506,91 @@
                         document.getElementById(questId).classList.add('quest-complete');
                         quests++;
                         updateHUD();
-                        showBanner('Quest Completed!');
-                        addExp(50);
+                        
+                        // Map questId to quest name
+                        const questNames = {
+                            'quest-1': 'View Projects Section',
+                            'quest-2': 'View Skills Section',
+                            'quest-3': 'View Services Section',
+                            'quest-4': 'View Network Section',
+                            'quest-5': 'Find All Achievements'
+                        };
+                        const questName = questNames[questId] || 'Quest Completed';
+                        
+                        if (questId === 'quest-5') {
+                            // Delay the Quest 5 celebration to allow the achievement banner to show first
+                            setTimeout(() => {
+                                showGameCompleteCelebration();
+                                addExp(30);
+                            }, 3000); // Delay by 3 seconds to match the achievement banner duration
+                        } else {
+                            showBanner('quest', questName);
+                            addExp(30);
+                        }
                     }
                 }
             }
             
-            // Parallax effect on scroll
+            // Check if element is in viewport
+            function isElementInViewport(el) {
+                const rect = el.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+                return (
+                    rect.top < windowHeight &&
+                    rect.bottom > 0 &&
+                    rect.left < windowWidth &&
+                    rect.right > 0
+                );
+            }
+            
+            // Parallax effect and section viewing timer on scroll
+            window.addEventListener('scroll', function() {
+                const scrollPosition = window.pageYOffset;
+                const parallaxLayers = document.querySelectorAll('.parallax-layer');
+                
+                parallaxLayers.forEach(layer => {
+                    const speed = layer.getAttribute('data-speed');
+                    layer.style.transform = `translateY(${scrollPosition * speed}px)`;
+                });
+                window.addEventListener('scroll', function() {
+                    console.log(`Scroll detected, scrollY: ${window.scrollY}, hasScrolled: ${hasScrolled}`);
+                    if (!hasScrolled && window.scrollY > 0) {
+                        hasScrolled = true;
+                        console.log('Triggering Explorer achievement');
+                        unlockAchievement('achievement-explorer', 'Explorer');
+                    }
+                });
+                
+                // Check for section content visibility to start timers and update quests
+                const sections = [
+                    { id: 'projects', element: document.querySelector('#projects .grid'), quest: 'quest-1' },
+                    { id: 'skills', element: document.querySelector('#skills .grid'), quest: 'quest-2' },
+                    { id: 'services', element: document.querySelector('#services .grid'), quest: 'quest-3' },
+                    { id: 'contact', element: document.querySelector('#contact .max-w-lg'), quest: 'quest-4' }
+                ];
+                
+                sections.forEach(section => {
+                    if (section.element) {
+                        const isVisible = isElementInViewport(section.element);
+                        const viewedVariable = `${section.id}SectionViewed`;
+                        
+                        if (isVisible && !window[viewedVariable]) {
+                            if (!viewTimers[section.id]) {
+                                viewTimers[section.id] = setTimeout(() => {
+                                    window[viewedVariable] = true;
+                                    console.log(`${section.id} section viewed for 3 seconds!`);
+                                    viewTimers[section.id] = null;
+                                    updateQuestProgress(section.quest, 1, 1);
+                                }, 3000);
+                            }
+                        } else if (!isVisible && viewTimers[section.id]) {
+                            clearTimeout(viewTimers[section.id]);
+                            viewTimers[section.id] = null;
+                        }
+                    }
+                });
+            });
             window.addEventListener('scroll', function() {
                 const scrollPosition = window.pageYOffset;
                 const parallaxLayers = document.querySelectorAll('.parallax-layer');
@@ -1373,68 +1600,89 @@
                     layer.style.transform = `translateY(${scrollPosition * speed}px)`;
                 });
                 
-                // Check for section visibility to unlock achievements
-                const sections = ['projects', 'skills', 'services', 'contact'];
+                // Check for section content visibility to start timers and update quests
+                const sections = [
+                    { id: 'projects', element: document.querySelector('#projects .grid'), quest: 'quest-1' },
+                    { id: 'skills', element: document.querySelector('#skills .grid'), quest: 'quest-2' },
+                    { id: 'services', element: document.querySelector('#services .grid'), quest: 'quest-3' },
+                    { id: 'contact', element: document.querySelector('#contact .max-w-lg'), quest: 'quest-4' }
+                ];
+                
+                // Track viewed sections locally
+                const viewedSections = {
+                    projects: projectsSectionViewed,
+                    skills: skillsSectionViewed,
+                    services: servicesSectionViewed,
+                    contact: contactSectionViewed
+                };
+                
                 sections.forEach(section => {
-                    const element = document.getElementById(section);
-                    if (element && isElementInViewport(element)) {
-                        switch(section) {
-                            case 'projects':
-                                unlockAchievement('achievement-explorer', 'Explorer');
-                                break;
-                            case 'skills':
-                                if (!skillsViewed) {
-                                    skillsViewed = true;
-                                    updateQuestProgress('quest-2', 1, 1);
-                                }
-                                unlockAchievement('achievement-skillmaster', 'Skill Master');
-                                break;
-                            case 'services':
-                                unlockAchievement('achievement-service', 'Service Discoverer');
-                                break;
-                            case 'contact':
-                                unlockAchievement('achievement-networker', 'Networker');
-                                break;
-                        }
-                    }
-                });
-            });
-            
-            // Check if element is in viewport
-            function isElementInViewport(el) {
-                const rect = el.getBoundingClientRect();
-                return (
-                    rect.top >= 0 &&
-                    rect.top <= (window.innerHeight || document.documentElement.clientHeight)
-                );
-            }
-            
-            // Project card hover tracking
-            const projectCards = document.querySelectorAll('.project-card');
-            projectCards.forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('explored')) {
-                        this.classList.add('explored');
-                        projectsExplored++;
-                        addExp(10);
-                        updateQuestProgress('quest-1', projectsExplored, 4);
+                    if (section.element) {
+                        const isVisible = isElementInViewport(section.element);
                         
-                        if (projectsExplored >= 4 && achievements >= 4) {
-                            unlockAchievement('achievement-completionist', 'Completionist');
+                        // Debugging: Log visibility status
+                        if (isVisible) {
+                            console.log(`${section.id} section content is in viewport`);
                         }
+                        
+                        if (isVisible && !viewedSections[section.id]) {
+                            if (!viewTimers[section.id]) {
+                                console.log(`Starting timer for ${section.id} section`);
+                                viewTimers[section.id] = setTimeout(() => {
+                                    viewedSections[section.id] = true;
+                                    // Update the global variables for consistency
+                                    if (section.id === 'projects') projectsSectionViewed = true;
+                                    if (section.id === 'skills') skillsSectionViewed = true;
+                                    if (section.id === 'services') servicesSectionViewed = true;
+                                    if (section.id === 'contact') contactSectionViewed = true;
+                                    console.log(`${section.id} section viewed for 3 seconds!`);
+                                    viewTimers[section.id] = null;
+                                    updateQuestProgress(section.quest, 1, 1);
+                                }, 3000);
+                            }
+                        } else if (!isVisible && viewTimers[section.id]) {
+                            console.log(`Clearing timer for ${section.id} section`);
+                            clearTimeout(viewTimers[section.id]);
+                            viewTimers[section.id] = null;
+                        }
+                    } else {
+                        console.error(`Element for ${section.id} not found! Selector: ${section.element}`);
                     }
                 });
             });
             
-            // Interactive skill bars
+            // Interactive skill bars for Skill Master
             const skillItems = document.querySelectorAll('.skill-item');
             skillItems.forEach(item => {
                 const progressBar = item.querySelector('.progress-bar');
                 const width = progressBar.getAttribute('data-width');
                 
-                // Set up hover effect for skill item
                 item.addEventListener('mouseenter', function() {
                     progressBar.style.width = width;
+                    if (!this.classList.contains('hovered')) {
+                        this.classList.add('hovered');
+                        skillsHovered++;
+                        if (skillsHovered >= 3) {
+                            unlockAchievement('achievement-skillmaster', 'Skill Master');
+                        }
+                    }
+                });
+                // Project card hover tracking for Project Flipper
+                const projectCards = document.querySelectorAll('.project-card');
+                console.log(`Found ${projectCards.length} project cards`);
+                projectCards.forEach((card, index) => {
+                    card.addEventListener('mouseenter', function() {
+                        if (!this.classList.contains('explored')) {
+                            this.classList.add('explored');
+                            projectsExplored++;
+                            console.log(`Project card ${index + 1} explored, total: ${projectsExplored}`);
+                            addExp(15);
+                            if (projectsExplored >= 4) {
+                                console.log('Triggering Project Flipper achievement');
+                                unlockAchievement('achievement-flipper', 'Project Flipper');
+                            }
+                        }
+                    });
                 });
                 
                 item.addEventListener('mouseleave', function() {
@@ -1442,19 +1690,14 @@
                 });
             });
             
-            // Service selection tracking
+            // Service selection tracking for Service Selector
             const serviceButtons = document.querySelectorAll('.bg-gray-800.rounded-lg.p-6 button');
             serviceButtons.forEach(button => {
                 button.addEventListener('click', function() {
-                    const service = this.closest('.bg-gray-800.rounded-lg.p-6');
-                    
-                    if (!service.classList.contains('viewed')) {
-                        service.classList.add('viewed');
-                        servicesViewed++;
-                        addExp(20);
-                        updateQuestProgress('quest-3', servicesViewed, 6);
+                    if (!hasSelectedService) {
+                        hasSelectedService = true;
+                        unlockAchievement('achievement-service', 'Service Selector');
                     }
-                    
                     // Simulate selection effect
                     this.textContent = 'SELECTED';
                     this.classList.add('glow');
@@ -1495,7 +1738,8 @@
                         this.disabled = true;
                         this.classList.add('bg-green-800');
                         addExp(30);
-                        showBanner('Message sent successfully!');
+                        showBanner('custom', 'Message sent successfully!');
+                        unlockAchievement('achievement-networker', 'Networker');
                     }, 1500);
                 } else {
                     showBanner('Please fill all required fields');
@@ -1520,13 +1764,10 @@
                     messageField.value = message;
                 }
                 
-                // Trigger existing service button logic
-                const service = document.querySelector(`button[onclick*="${serviceName}"]`).closest('.bg-gray-800.rounded-lg.p-6');
-                if (!service.classList.contains('viewed')) {
-                    service.classList.add('viewed');
-                    servicesViewed++;
-                    addExp(20);
-                    updateQuestProgress('quest-3', servicesViewed, 6);
+                // Trigger Service Selector achievement
+                if (!hasSelectedService) {
+                    hasSelectedService = true;
+                    unlockAchievement('achievement-service', 'Service Selector');
                 }
                 
                 // Simulate selection effect

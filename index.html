@@ -138,15 +138,18 @@
         @keyframes pulse {
             0% {
                 background: linear-gradient(90deg, #4c1d95, #8b5cf6);
-                box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+                transform: scale(1);
             }
             50% {
-                background: linear-gradient(90deg, #ffd700, #ffea00);
-                box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+                background: linear-gradient(90deg, #10b981, #f59e0b);
+                box-shadow: 0 0 30px rgba(16, 185, 129, 1), 0 0 60px rgba(245, 158, 11, 0.8);
+                transform: scale(1.1);
             }
             100% {
                 background: linear-gradient(90deg, #4c1d95, #8b5cf6);
-                box-shadow: 0 0 0 rgba(255, 215, 0, 0);
+                box-shadow: 0 0 0 rgba(16, 185, 129, 0);
+                transform: scale(1);
             }
         }
 
@@ -353,7 +356,6 @@
             </div>
         </div>
     </div>
-
     <!-- Welcome Message Box -->
     <div id="welcome-message" class="fixed inset-0 z-50 flex items-center justify-center hidden">
         <div class="absolute inset-0 bg-black bg-opacity-70"></div>
@@ -1430,6 +1432,60 @@
             }
             
             animate();
+            // Level-up particle burst
+            function createLevelUpParticles(x, y) {
+                const particleCanvas = document.getElementById('welcome-particle-canvas');
+                const ctx = particleCanvas.getContext('2d');
+                const particles = [];
+
+                class LevelUpParticle {
+                    constructor(x, y) {
+                        this.x = x;
+                        this.y = y;
+                        this.size = Math.random() * 5 + 3;
+                        this.color = ['#6d28d9', '#10b981', '#f59e0b'][Math.floor(Math.random() * 3)];
+                        this.vx = Math.random() * 10 - 5;
+                        this.vy = Math.random() * 10 - 5;
+                        this.opacity = 1;
+                        this.gravity = 0.1;
+                    }
+
+                    update() {
+                        this.x += this.vx;
+                        this.y += this.vy + this.gravity;
+                        this.opacity -= 0.02;
+                        this.gravity += 0.05;
+                    }
+
+                    draw() {
+                        ctx.fillStyle = `${this.color}${Math.floor(this.opacity * 255).toString(16).padStart(2, '0')}`;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                // Create particles
+                for (let i = 0; i < 50; i++) {
+                    particles.push(new LevelUpParticle(x, y));
+                }
+
+                // Animate particles
+                function animateLevelUpParticles() {
+                    ctx.clearRect(0, 0, particleCanvas.width, particleCanvas.height);
+                    particles.forEach((particle, index) => {
+                        particle.update();
+                        particle.draw();
+                        if (particle.opacity <= 0) {
+                            particles.splice(index, 1);
+                        }
+                    });
+                    if (particles.length > 0) {
+                        requestAnimationFrame(animateLevelUpParticles);
+                    }
+                }
+                animateLevelUpParticles();
+            }
             // Confetti effect for Game Complete celebration
             const confettiCanvas = document.getElementById('confetti-canvas');
             const confettiCtx = confettiCanvas.getContext('2d');
@@ -1492,6 +1548,16 @@
                 requestAnimationFrame(animateConfetti);
             }
 
+            // Level-up sound effect
+            function playLevelUpSound() {
+                console.log('Attempting to play level-up sound');
+                const audio = new Audio('assets/level_up.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+
             // Function to show the Game Complete celebration
             function showGameCompleteCelebration() {
                 const celebration = document.getElementById('game-complete-celebration');
@@ -1507,6 +1573,7 @@
                     }, 500); // Match the fade-out transition duration
                 }, 5000);
             }
+
             // Game functionality code
             let level = 1;
             let exp = 0;
@@ -1530,7 +1597,7 @@
                 services: null,
                 contact: null
             };
-            
+
             // Update HUD displays
             function updateHUD() {
                 document.getElementById('level-display').textContent = level;
@@ -1538,7 +1605,7 @@
                 document.getElementById('achievements-count').textContent = achievements;
                 document.getElementById('quests-count').textContent = quests;
             }
-            
+
             // Add experience points
             function addExp(amount) {
                 exp += amount;
@@ -1547,8 +1614,32 @@
                     const expFill = document.getElementById('exp-fill');
                     expFill.style.width = '100%';
 
-                    // Immediately start the celebration (yellow glow)
+                    // Immediately start the celebration (enhanced pulse, particles, and text)
                     expFill.classList.add('pulse');
+                    playLevelUpSound();
+                    // Create particle burst around EXP bar
+                    const expBar = document.querySelector('.exp-bar');
+                    const rect = expBar.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    createLevelUpParticles(centerX, centerY);
+                    // Show "Level Up!" text
+                    const levelUpText = document.createElement('div');
+                    levelUpText.textContent = 'Level Up!';
+                    levelUpText.className = 'game-font text-yellow-400 text-lg absolute';
+                    levelUpText.style.left = `${rect.left + rect.width / 4}px`;
+                    levelUpText.style.top = `${rect.top - 30}px`;
+                    levelUpText.style.opacity = '0';
+                    levelUpText.style.transition = 'opacity 0.5s, transform 0.5s';
+                    document.body.appendChild(levelUpText);
+                    setTimeout(() => {
+                        levelUpText.style.opacity = '1';
+                        levelUpText.style.transform = 'translateY(-20px)';
+                    }, 10);
+                    setTimeout(() => {
+                        levelUpText.style.opacity = '0';
+                        setTimeout(() => document.body.removeChild(levelUpText), 500);
+                    }, 1500);
 
                     // Handle multiple level-ups in a loop
                     let levelsGained = 0;
@@ -1569,7 +1660,7 @@
                     updateHUD(); // Update HUD immediately if not leveling up
                 }
             }
-            
+
             // Show achievement banner
             function showBanner(type, message) {
                 const banner = document.getElementById('achievement-banner');
@@ -1596,7 +1687,7 @@
                     banner.classList.remove('show');
                 }, 3000);
             }
-            
+
             // Unlock achievement
             function unlockAchievement(id, name) {
                 if (!unlockedAchievements.has(id)) {
@@ -1608,7 +1699,7 @@
                     updateQuestProgress('quest-5', achievements, 5);
                 }
             }
-            
+
             // Update quest progress
             function updateQuestProgress(questId, current, total) {
                 const progressBar = document.getElementById(`${questId}-progress`);
@@ -1648,7 +1739,7 @@
                     }
                 }
             }
-            
+
             // Check if element is in viewport
             function isElementInViewport(el) {
                 const rect = el.getBoundingClientRect();
@@ -1661,7 +1752,7 @@
                     rect.right > 0
                 );
             }
-            
+
             // Parallax effect and section viewing timer on scroll
             window.addEventListener('scroll', function() {
                 const scrollPosition = window.pageYOffset;
@@ -1670,60 +1761,11 @@
                     const speed = layer.getAttribute('data-speed');
                     layer.style.transform = `translateY(${scrollPosition * speed}px)`;
                 });
-                window.addEventListener('scroll', function() {
-                    console.log(`Scroll detected, scrollY: ${window.scrollY}, hasScrolled: ${hasScrolled}`);
-                    if (!hasScrolled && window.scrollY > 0) {
-                        hasScrolled = true;
-                        console.log('Triggering Explorer achievement');
-                        unlockAchievement('achievement-explorer', 'Explorer');
-                    }
-                });
-                // Replaced section viewing logic
-                const viewedSections = {
-                    projects: projectsSectionViewed,
-                    skills: skillsSectionViewed,
-                    services: servicesSectionViewed,
-                    contact: contactSectionViewed
-                };
-                sections.forEach(section => {
-                    if (section.element) {
-                        const isVisible = isElementInViewport(section.element);
-                        if (isVisible) {
-                            console.log(`${section.id} section content is in viewport`);
-                        }
-                        if (isVisible && !viewedSections[section.id]) {
-                            if (!viewTimers[section.id]) {
-                                console.log(`Starting timer for ${section.id} section`);
-                                viewTimers[section.id] = setTimeout(() => {
-                                    viewedSections[section.id] = true;
-                                    if (section.id === 'projects') projectsSectionViewed = true;
-                                    if (section.id === 'skills') skillsSectionViewed = true;
-                                    if (section.id === 'services') servicesSectionViewed = true;
-                                    if (section.id === 'contact') contactSectionViewed = true;
-                                    console.log(`${section.id} section viewed for 3 seconds!`);
-                                    viewTimers[section.id] = null;
-                                    updateQuestProgress(section.quest, 1, 1);
-                                }, 3000);
-                            }
-                        } else if (!isVisible && viewTimers[section.id]) {
-                            console.log(`Clearing timer for ${section.id} section`);
-                            clearTimeout(viewTimers[section.id]);
-                            viewTimers[section.id] = null;
-                        }
-                    } else {
-                        console.error(`Element for ${section.id} not found! Selector: ${section.element}`);
-                    }
-                });
-            });
-            window.addEventListener('scroll', function() {
-                const scrollPosition = window.pageYOffset;
-                const parallaxLayers = document.querySelectorAll('.parallax-layer');
-                
-                parallaxLayers.forEach(layer => {
-                    const speed = layer.getAttribute('data-speed');
-                    layer.style.transform = `translateY(${scrollPosition * speed}px)`;
-                });
-                
+                if (!hasScrolled && window.scrollY > 0) {
+                    hasScrolled = true;
+                    console.log('Triggering Explorer achievement');
+                    unlockAchievement('achievement-explorer', 'Explorer');
+                }
                 // Check for section content visibility to start timers and update quests
                 const sections = [
                     { id: 'projects', element: document.querySelector('#projects .grid'), quest: 'quest-1' },
@@ -1732,7 +1774,6 @@
                     { id: 'contact', element: document.querySelector('#contact .max-w-lg'), quest: 'quest-4' }
                 ];
                 
-                // Track viewed sections locally
                 const viewedSections = {
                     projects: projectsSectionViewed,
                     skills: skillsSectionViewed,
@@ -1743,18 +1784,11 @@
                 sections.forEach(section => {
                     if (section.element) {
                         const isVisible = isElementInViewport(section.element);
-                        
-                        // Debugging: Log visibility status
-                        if (isVisible) {
-                            console.log(`${section.id} section content is in viewport`);
-                        }
-                        
                         if (isVisible && !viewedSections[section.id]) {
                             if (!viewTimers[section.id]) {
                                 console.log(`Starting timer for ${section.id} section`);
                                 viewTimers[section.id] = setTimeout(() => {
                                     viewedSections[section.id] = true;
-                                    // Update the global variables for consistency
                                     if (section.id === 'projects') projectsSectionViewed = true;
                                     if (section.id === 'skills') skillsSectionViewed = true;
                                     if (section.id === 'services') servicesSectionViewed = true;
@@ -1774,7 +1808,7 @@
                     }
                 });
             });
-            
+
             // Interactive skill bars for Skill Master
             const skillItems = document.querySelectorAll('.skill-item');
             skillItems.forEach(item => {
@@ -1791,26 +1825,27 @@
                         }
                     }
                 });
-                // Project card hover tracking for Project Flipper
-                const projectCards = document.querySelectorAll('.project-card');
-                projectCards.forEach((card, index) => {
-                    card.addEventListener('mouseenter', function() {
-                        if (!this.classList.contains('explored')) {
-                            this.classList.add('explored');
-                            projectsExplored++;
-                            addExp(15);
-                            if (projectsExplored >= 4) {
-                                unlockAchievement('achievement-flipper', 'Project Flipper');
-                            }
-                        }
-                    });
-                });
                 
                 item.addEventListener('mouseleave', function() {
                     progressBar.style.width = '0%';
                 });
             });
-            
+
+            // Project card hover tracking for Project Flipper
+            const projectCards = document.querySelectorAll('.project-card');
+            projectCards.forEach((card, index) => {
+                card.addEventListener('mouseenter', function() {
+                    if (!this.classList.contains('explored')) {
+                        this.classList.add('explored');
+                        projectsExplored++;
+                        addExp(15);
+                        if (projectsExplored >= 4) {
+                            unlockAchievement('achievement-flipper', 'Project Flipper');
+                        }
+                    }
+                });
+            });
+
             // Service selection tracking for Service Selector
             const serviceButtons = document.querySelectorAll('.bg-gray-800.rounded-lg.p-6 button');
             serviceButtons.forEach(button => {
@@ -1829,18 +1864,18 @@
                     }, 2000);
                 });
             });
-            
+
             // Button interactions
             document.getElementById('start-quest').addEventListener('click', function() {
                 document.getElementById('projects').scrollIntoView({behavior: 'smooth'});
                 addExp(5);
             });
-            
+
             document.getElementById('view-skills').addEventListener('click', function() {
                 document.getElementById('skills').scrollIntoView({behavior: 'smooth'});
                 addExp(5);
             });
-            
+
             document.getElementById('view-services').addEventListener('click', function() {
                 document.getElementById('services').scrollIntoView({behavior: 'smooth'});
                 addExp(5);
@@ -1881,9 +1916,13 @@
                     showBanner('custom', 'Please fill all required fields');
                 }
             });
-            
+
+            // Test sound button
+            document.getElementById('test-sound') && document.getElementById('test-sound').addEventListener('click', playLevelUpSound);
+
             // Initialize HUD
             updateHUD();
+
             // Service selection function
             window.selectService = function(serviceName, message) {
                 // Scroll to Contact section

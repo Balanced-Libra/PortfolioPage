@@ -1600,6 +1600,22 @@
                 });
             }
 
+            // Error sound effect
+            function playErrorSound() {
+                console.log('Attempting to play error sound');
+                const audio = new Audio('assets/error.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+
+            // Email validation function
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+
             // Function to show the Game Complete celebration
             function showGameCompleteCelebration() {
                 const celebration = document.getElementById('game-complete-celebration');
@@ -1933,6 +1949,13 @@
                 const messageField = document.getElementById('message');
                 
                 if (nameField.value && emailField.value && messageField.value) {
+                    // Validate email format
+                    if (!isValidEmail(emailField.value)) {
+                        showBanner('custom', 'Please enter a valid email address');
+                        playErrorSound();
+                        return; // Stop the function if email is invalid
+                    }
+                    
                     this.textContent = 'SENDING...';
                     this.disabled = true;
                     
@@ -1955,10 +1978,12 @@
                             this.textContent = 'SEND MESSAGE';
                             this.disabled = false;
                             showBanner('custom', 'Failed to send message. Try again!');
+                            playErrorSound();
                             console.error('EmailJS error:', error);
                         });
                 } else {
                     showBanner('custom', 'Please fill all required fields');
+                    playErrorSound();
                 }
             });
 

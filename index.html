@@ -1577,7 +1577,7 @@
             // Achievement unlocked sound effect
             function playAchievementSound() {
                 console.log('Attempting to play achievement sound');
-                const audio = new Audio('assets/achievement2.mp3');
+                const audio = new Audio('assets/achievement.mp3');
                 audio.volume = 1;
                 audio.play().catch(error => {
                     console.error('Audio playback failed:', error);
@@ -1587,7 +1587,7 @@
             // Quest completed sound effect
             function playQuestCompleteSound() {
                 console.log('Attempting to play quest complete sound');
-                const audio = new Audio('assets/achievement.mp3');
+                const audio = new Audio('assets/notification2.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(error => {
                     console.error('Audio playback failed:', error);

@@ -1570,12 +1570,43 @@
                 });
             }
 
+            // Achievement unlocked sound effect
+            function playAchievementSound() {
+                console.log('Attempting to play achievement sound');
+                const audio = new Audio('assets/achievement2.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+
+            // Quest completed sound effect
+            function playQuestCompleteSound() {
+                console.log('Attempting to play quest complete sound');
+                const audio = new Audio('assets/achievement.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+
+            // Game complete sound effect
+            function playGameCompleteSound() {
+                console.log('Attempting to play game complete sound');
+                const audio = new Audio('assets/quest.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+
             // Function to show the Game Complete celebration
             function showGameCompleteCelebration() {
                 const celebration = document.getElementById('game-complete-celebration');
                 celebration.classList.remove('hidden');
                 celebration.classList.add('show');
                 animateConfetti();
+                playGameCompleteSound();
                 
                 // Auto-hide after 5 seconds
                 setTimeout(() => {
@@ -1707,6 +1738,7 @@
                     achievements++;
                     updateHUD();
                     showBanner('achievement', name);
+                    playAchievementSound();
                     addExp(25);
                     updateQuestProgress('quest-5', achievements, 5);
                 }
@@ -1746,6 +1778,7 @@
                             }, 3000); // Delay by 3 seconds to match the achievement banner duration
                         } else {
                             showBanner('quest', questName);
+                            playQuestCompleteSound();
                             addExp(30);
                         }
                     }

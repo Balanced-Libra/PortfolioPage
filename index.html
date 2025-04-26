@@ -1578,7 +1578,7 @@
             function playAchievementSound() {
                 console.log('Attempting to play achievement sound');
                 const audio = new Audio('assets/achievement2.mp3');
-                audio.volume = 0.5;
+                audio.volume = 1;
                 audio.play().catch(error => {
                     console.error('Audio playback failed:', error);
                 });

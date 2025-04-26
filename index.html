@@ -1119,6 +1119,9 @@
 
                     // Handle button click
                     startButton.addEventListener('click', () => {
+                        // Play startup sound
+                        playStartupSound();
+
                         // Trigger particle burst at button center
                         const buttonRect = startButton.getBoundingClientRect();
                         const x = buttonRect.left + buttonRect.width / 2;
@@ -1552,6 +1555,15 @@
             function playLevelUpSound() {
                 console.log('Attempting to play level-up sound');
                 const audio = new Audio('assets/level_up.mp3');
+                audio.volume = 0.5;
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+            // Startup sound effect
+            function playStartupSound() {
+                console.log('Attempting to play startup sound');
+                const audio = new Audio('assets/startup.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(error => {
                     console.error('Audio playback failed:', error);

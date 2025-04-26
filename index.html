@@ -1551,20 +1551,10 @@
             // Level-up sound effect
             function playLevelUpSound() {
                 console.log('Attempting to play level-up sound');
-                const audio = new Audio('assets/levelUp.mp3');
+                const audio = new Audio('assets/level_up.mp3');
                 audio.volume = 0.5;
                 audio.play().catch(error => {
                     console.error('Audio playback failed:', error);
-                });
-            }
-
-            // Startup sound effect for welcome modal
-            function playStartupSound() {
-                console.log('Attempting to play startup sound');
-                const audio = new Audio('assets/startup.mp3');
-                audio.volume = 0.5;
-                audio.play().catch(error => {
-                    console.error('Startup audio playback failed:', error);
                 });
             }
 
@@ -1761,78 +1751,6 @@
                     rect.left < windowWidth &&
                     rect.right > 0
                 );
-            }
-
-            // Welcome modal particle burst
-            const welcomeParticles = [];
-            const welcomeParticleCount = 50;
-
-            class WelcomeParticle {
-                constructor(x, y) {
-                    this.x = x;
-                    this.y = y;
-                    this.size = Math.random() * 5 + 2;
-                    this.speedX = Math.random() * 6 - 3;
-                    this.speedY = Math.random() * 6 - 3;
-                    this.color = `hsl(${Math.random() * 360}, 100%, 50%)`;
-                    this.life = 60; // Frames to live
-                }
-
-                update() {
-                    this.x += this.speedX;
-                    this.y += this.speedY;
-                    this.life--;
-                    this.size *= 0.95; // Shrink over time
-                }
-
-                draw() {
-                    confettiCtx.save();
-                    confettiCtx.globalAlpha = this.life / 60;
-                    confettiCtx.fillStyle = this.color;
-                    confettiCtx.beginPath();
-                    confettiCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                    confettiCtx.fill();
-                    confettiCtx.restore();
-                }
-            }
-
-            function createWelcomeParticles(x, y) {
-                for (let i = 0; i < welcomeParticleCount; i++) {
-                    welcomeParticles.push(new WelcomeParticle(x, y));
-                }
-            }
-
-            function animateWelcomeParticles() {
-                for (let i = welcomeParticles.length - 1; i >= 0; i--) {
-                    const particle = welcomeParticles[i];
-                    particle.update();
-                    particle.draw();
-                    if (particle.life <= 0) {
-                        welcomeParticles.splice(i, 1);
-                    }
-                }
-                if (welcomeParticles.length > 0) {
-                    requestAnimationFrame(animateWelcomeParticles);
-                }
-            }
-
-            // Welcome modal logic
-            if (!localStorage.getItem('welcomeShown')) {
-                const welcomeModal = document.getElementById('welcome-modal');
-                welcomeModal.classList.remove('hidden');
-                
-                const startAdventureButton = document.getElementById('start-adventure');
-                startAdventureButton.addEventListener('click', () => {
-                    playStartupSound();
-                    localStorage.setItem('welcomeShown', 'true');
-                    welcomeModal.classList.add('hidden');
-                    const rect = startAdventureButton.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    createWelcomeParticles(centerX, centerY);
-                    animateWelcomeParticles();
-                    addExp(5); // Add initial EXP for starting the adventure
-                });
             }
 
             // Parallax effect and section viewing timer on scroll

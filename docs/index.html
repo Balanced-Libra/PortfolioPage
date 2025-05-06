@@ -31,6 +31,13 @@
         .project-card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             perspective: 1000px;
+            min-height: 24rem; /* Fallback for larger screens */
+        }
+        @media (max-width: 768px) {
+            .project-card {
+                min-height: auto; /* Allow card to grow on mobile */
+                height: auto; /* Ensure content dictates height */
+            }
         }
         
         .project-card:hover {
@@ -42,9 +49,11 @@
             position: relative;
             transition: transform 0.6s;
             transform-style: preserve-3d;
+            height: 100%; /* Ensure full height of parent */
         }
         
-        .project-card:hover .card-flip {
+        .project-card:hover .card-flip,
+        .project-card.flipped .card-flip {
             transform: rotateY(180deg);
         }
         
@@ -53,10 +62,46 @@
             width: 100%;
             height: 100%;
             backface-visibility: hidden;
+            overflow: auto; /* Allow scrolling if content overflows */
+        }
+        
+        @media (max-width: 768px) {
+            .card-flip {
+                transform: none !important; /* Disable 3D transform on mobile */
+                transition: none; /* Remove transition to avoid partial flip */
+            }
+            .card-front, .card-back {
+                position: relative; /* Stack normally on mobile */
+                height: auto; /* Allow content to dictate height */
+                backface-visibility: visible; /* Ensure visibility during toggle */
+                transition: opacity 0.3s ease; /* Smooth fade for visibility toggle */
+                transform: none !important; /* Explicitly disable any transforms */
+            }
+            .card-back {
+                display: none; /* Hidden by default */
+                opacity: 0; /* Start invisible for fade effect */
+                transform-origin: center; /* Ensure no residual transform effects */
+                transform: scaleX(1) !important; /* Explicitly set normal orientation */
+                direction: ltr; /* Force left-to-right text direction */
+            }
+            .project-card.flipped .card-front {
+                display: none; /* Hide front when flipped */
+                opacity: 0; /* Ensure invisible */
+            }
+            .project-card.flipped .card-back {
+                display: block; /* Show back when flipped */
+                opacity: 1; /* Fully visible */
+            }
         }
         
         .card-back {
-            transform: rotateY(180deg);
+            pointer-events: auto; /* Ensure back face can receive events */
+        }
+
+        @media (min-width: 769px) {
+            .card-back {
+                transform: rotateY(180deg); /* Apply 3D flip for desktop */
+            }
         }
         
         .progress-container {
@@ -75,6 +120,10 @@
             opacity: 0; /* Start hidden */
             transition: width 1s ease-in-out, opacity 0.5s ease-in-out;
         }
+
+        .skill-item.touched .progress-bar {
+            opacity: 1; /* Show on touch */
+        }
         
         .skill-item {
             cursor: pointer;
@@ -87,6 +136,10 @@
         
         .skill-item:hover .progress-bar {
             opacity: 1; /* Show on hover */
+        }
+
+        .skill-item.touched .progress-bar {
+            opacity: 1; /* Show on touch */
         }
         
         .achievement {
@@ -247,7 +300,7 @@
         
         .banner {
             position: fixed;
-            top: -100px;
+            top: -150px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(90deg, var(--primary), var(--secondary));
@@ -427,9 +480,9 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8">
                 <!-- Project 1: Self-Designed Robot Arm -->
-                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg h-96">
-                    <div class="card-flip h-full">
-                        <div class="card-front h-full">
+                <div class="project-card rounded-xl overflow-hidden bg-gray-800 shadow-lg">
+                    <div class="card-flip">
+                        <div class="card-front">
                             <div class="bg-gray-900 h-48 flex items-center justify-center">
                                 <i class="fas fa-robot text-6xl text-purple-400"></i>
                             </div>
@@ -439,7 +492,7 @@
                                 <p class="text-gray-400">A 6-degree-of-freedom robot arm I designed from scratch, blending creativity and tech. Built for precise object manipulation using 3D-printed parts and custom code.</p>
                             </div>
                         </div>
-                        <div class="card-back h-full bg-gray-800 p-6">
+                        <div class="card-back bg-gray-800 p-6">
                             <div class="game-font text-purple-400 text-xs mb-2">PROJECT DETAILS</div>
                             <h3 class="text-xl font-bold mb-4">Self-Designed Robot Arm</h3>
                             <ul class="text-gray-300 space-y-2">
@@ -459,7 +512,6 @@
                                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">C++</span>
                                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">ESP32</span>
                                     <span class="px-2 py-1 bg-gray-700 rounded text-xs">FreeRTOS</span>
-
                                 </div>
                             </div>
                             <a href="https://github.com/Balanced-Libra/Hercules" target="_blank" class="game-font mt-4 block w-full px-4 py-2 bg-purple-600 text-white text-center rounded hover:bg-purple-700 transition">VIEW REPO</a>
@@ -1892,20 +1944,78 @@
                 const progressBar = item.querySelector('.progress-bar');
                 const width = progressBar.getAttribute('data-width');
                 
-                item.addEventListener('mouseenter', function() {
+                // Function to show progress bar and track hover/tap
+                const showProgress = () => {
                     progressBar.style.width = width;
-                    if (!this.classList.contains('hovered')) {
-                        this.classList.add('hovered');
+                    item.classList.add('touched');
+                    if (!item.classList.contains('hovered')) {
+                        item.classList.add('hovered');
                         skillsHovered++;
                         if (skillsHovered >= 3) {
                             unlockAchievement('achievement-skillmaster', 'Skill Master');
                         }
                     }
-                });
+                };
                 
-                item.addEventListener('mouseleave', function() {
+                // Function to hide progress bar
+                const hideProgress = () => {
                     progressBar.style.width = '0%';
-                });
+                    item.classList.remove('touched');
+                };
+                
+                // Mouse events for desktop
+                item.addEventListener('mouseenter', showProgress);
+                item.addEventListener('mouseleave', hideProgress);
+                
+                // Touch event handling for mobile
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let touchStartTime = 0;
+                let isTap = true;
+                const touchThreshold = 15; // Max movement for a tap
+                const tapMaxDuration = 400; // Max duration for a tap (ms)
+
+                item.addEventListener('touchstart', (e) => {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                    isTap = true; // Assume it's a tap until proven otherwise
+                }, { passive: true });
+
+                item.addEventListener('touchmove', (e) => {
+                    const touchX = e.touches[0].clientX;
+                    const touchY = e.touches[0].clientY;
+                    const deltaX = touchX - touchStartX;
+                    const deltaY = touchY - touchStartY;
+                    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    // If movement exceeds threshold, it's a swipe, not a tap
+                    if (distanceMoved > touchThreshold) {
+                        isTap = false;
+                        hideProgress(); // Reset progress bar if it was shown
+                    }
+                }, { passive: true });
+
+                item.addEventListener('touchend', (e) => {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchDuration = Date.now() - touchStartTime;
+                    const deltaX = touchEndX - touchStartX;
+                    const deltaY = touchEndY - touchStartY;
+                    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+                    
+                    // Check if it's a valid tap: short duration and minimal movement
+                    if (isTap && distanceMoved < touchThreshold && touchDuration < tapMaxDuration) {
+                        // Toggle progress bar: show if hidden, hide if shown
+                        if (progressBar.style.width === '0%' || !progressBar.style.width) {
+                            showProgress();
+                        } else {
+                            hideProgress();
+                        }
+                    } else {
+                        hideProgress(); // Ensure progress bar is hidden for swipes
+                    }
+                }, { passive: true });
             });
 
             // Project card hover tracking for Project Flipper
@@ -1919,6 +2029,66 @@
                         if (projectsExplored >= 4) {
                             unlockAchievement('achievement-flipper', 'Project Flipper');
                         }
+                    }
+                });
+            });
+
+            // Touch event handling for project card flip on mobile with scroll support
+            projectCards.forEach((card) => {
+                let touchStartX = 0;
+                let touchStartY = 0;
+                let touchStartTime = 0;
+                const touchThreshold = 15; // Increased to reduce sensitivity
+                const tapMaxDuration = 400; // Slightly longer to allow deliberate taps
+                const verticalThreshold = 10; // Max vertical movement for a tap
+
+                card.addEventListener('touchstart', function(e) {
+                    touchStartX = e.touches[0].clientX;
+                    touchStartY = e.touches[0].clientY;
+                    touchStartTime = Date.now();
+                }, { passive: true });
+
+                card.addEventListener('touchend', function(e) {
+                    const touchEndX = e.changedTouches[0].clientX;
+                    const touchEndY = e.changedTouches[0].clientY;
+                    const touchDuration = Date.now() - touchStartTime;
+                    const deltaX = touchEndX - touchStartX;
+                    const deltaY = touchEndY - touchStartY;
+                    const distanceMoved = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+                    // Check for a deliberate tap: short duration, minimal movement, and limited vertical movement
+                    if (
+                        distanceMoved < touchThreshold &&
+                        touchDuration < tapMaxDuration &&
+                        Math.abs(deltaY) < verticalThreshold
+                    ) {
+                        e.preventDefault(); // Prevent default only for taps
+                        this.classList.toggle('flipped');
+                        // Mark as explored for achievement logic
+                        if (!this.classList.contains('explored')) {
+                            this.classList.add('explored');
+                            projectsExplored++;
+                            addExp(15);
+                            if (projectsExplored >= 4) {
+                                unlockAchievement('achievement-flipper', 'Project Flipper');
+                            }
+                        }
+                    }
+                    // Otherwise, allow default behavior (e.g., scrolling)
+                }, { passive: false });
+            });
+
+            // Ensure buttons on card-back are clickable without flipping the card
+            const cardButtons = document.querySelectorAll('.card-back a');
+            cardButtons.forEach(button => {
+                button.addEventListener('touchstart', function(e) {
+                    e.stopPropagation(); // Prevent touch event from bubbling to card flip
+                }, { passive: false });
+                button.addEventListener('click', function(e) {
+                    // Ensure the link navigates as expected
+                    const href = this.getAttribute('href');
+                    if (href) {
+                        window.open(href, '_blank');
                     }
                 });
             });
